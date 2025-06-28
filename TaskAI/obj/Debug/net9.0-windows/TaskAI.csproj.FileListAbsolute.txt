@@ -1,0 +1,15 @@
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\TaskAI.exe
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\TaskAI.deps.json
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\TaskAI.runtimeconfig.json
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\TaskAI.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\TaskAI.pdb
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.AssemblyInfoInputs.cache
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.AssemblyInfo.cs
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.csproj.CoreCompileInputs.cache
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.sourcelink.json
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\refint\TaskAI.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.pdb
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.genruntimeconfig.cache
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\ref\TaskAI.dll
