@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PTOEmxK6ZxU=",
+  "dgSpecHash": "XU3aloYsBWc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\TaskAI.csproj",
+  "projectFilePath": "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\TaskAI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\shaur\\.nuget\\packages\\dotnetenv\\3.1.1\\dotnetenv.3.1.1.nupkg.sha512",
     "C:\\Users\\shaur\\.nuget\\packages\\microsoft.extensions.configuration\\1.1.2\\microsoft.extensions.configuration.1.1.2.nupkg.sha512",

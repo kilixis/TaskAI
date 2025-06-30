@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\TaskAI.csproj": {}
+    "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\TaskAI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\TaskAI.csproj": {
+    "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\TaskAI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\TaskAI.csproj",
+        "projectUniqueName": "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\TaskAI.csproj",
         "projectName": "TaskAI",
-        "projectPath": "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\TaskAI.csproj",
+        "projectPath": "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\TaskAI.csproj",
         "packagesPath": "C:\\Users\\shaur\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\shaur\\Desktop\\TaskAI\\TaskAI\\obj\\",
+        "outputPath": "C:\\Users\\shaur\\Desktop\\TaskAI\\taskai\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\shaur\\AppData\\Roaming\\NuGet\\NuGet.Config"
