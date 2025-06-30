@@ -13,3 +13,10 @@ C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\refint\TaskAI.dll
 C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.pdb
 C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.genruntimeconfig.cache
 C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\ref\TaskAI.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.csproj.AssemblyReference.cache
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\DotNetEnv.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\Microsoft.Extensions.Configuration.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\Microsoft.Extensions.Primitives.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\bin\Debug\net9.0-windows\Sprache.dll
+C:\Users\shaur\Desktop\TaskAI\TaskAI\obj\Debug\net9.0-windows\TaskAI.csproj.Up2Date
