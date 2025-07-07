@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TaskAI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bdc8ff751ac5b7618a2db14a1117f6a3e138cf5a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cedc4799de04b21bc1a403e13a57c94daca6c7db")]
 [assembly: System.Reflection.AssemblyProductAttribute("TaskAI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TaskAI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

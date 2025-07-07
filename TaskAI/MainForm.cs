@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,126 +14,51 @@ namespace TaskAI
 {
     public class MainForm : Form
     {
+        private TextBox inputBox;
+        private Button sendButton;
         private readonly HttpClient httpClient = new HttpClient();
         private readonly string ApiKey;
-        private TextBox inputBox;
-        private Button searchButton;
-        private Button powerButton;
-        private readonly int borderRadius = 20;
-
-        private const string Endpoint = "https://openrouter.ai/api/v1/chat/completions";
+        private const string Endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
         public MainForm()
         {
             DotNetEnv.Env.Load();
             ApiKey = Environment.GetEnvironmentVariable("ApiKey");
-
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.DoubleBuffered = true;
-            this.BackColor = Color.Black;
-            this.TopMost = true;
-            this.StartPosition = FormStartPosition.Manual;
-            this.Size = new Size(500, 80);
-
-            Rectangle screen = Screen.PrimaryScreen.WorkingArea;
-            int x = (screen.Width - this.Width) / 2;
-            int y = screen.Height - this.Height - 30;
-            this.Location = new Point(x, y);
-
-            CreateRoundedRegion();
             InitializeUI();
-        }
-
-        private void CreateRoundedRegion()
-        {
-            GraphicsPath path = new GraphicsPath();
-            int r = borderRadius;
-            path.StartFigure();
-            path.AddArc(new Rectangle(0, 0, r, r), 180, 90);
-            path.AddArc(new Rectangle(this.Width - r, 0, r, r), 270, 90);
-            path.AddArc(new Rectangle(this.Width - r, this.Height - r, r, r), 0, 90);
-            path.AddArc(new Rectangle(0, this.Height - r, r, r), 90, 90);
-            path.CloseFigure();
-            this.Region = new Region(path);
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            int thickness = 4;
-            var rect = new Rectangle(0, 0, this.Width - 1, this.Height - 1);
-
-            using (var brush = new LinearGradientBrush(rect, Color.Red, Color.Violet, LinearGradientMode.Horizontal))
-            using (var pen = new Pen(brush, thickness))
-            {
-                pen.Alignment = PenAlignment.Inset;
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-                using (GraphicsPath path = GetRoundedPath(rect, borderRadius))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
-            }
-        }
-
-        private GraphicsPath GetRoundedPath(Rectangle bounds, int radius)
-        {
-            int diameter = radius * 2;
-            var path = new GraphicsPath();
-
-            path.StartFigure();
-            path.AddArc(bounds.Left, bounds.Top, diameter, diameter, 180, 90);
-            path.AddArc(bounds.Right - diameter, bounds.Top, diameter, diameter, 270, 90);
-            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
-            path.AddArc(bounds.Left, bounds.Bottom - diameter, diameter, diameter, 90, 90);
-            path.CloseFigure();
-
-            return path;
         }
 
         private void InitializeUI()
         {
+            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.TopMost = true;
+            this.StartPosition = FormStartPosition.Manual;
+            int formWidth = 500;
+            int formHeight = 100;
+            Rectangle screen = Screen.PrimaryScreen.WorkingArea;
+            int x = (screen.Width - formWidth) / 2;
+            int y = screen.Height - formHeight - 30;
+            this.Size = new Size(formWidth, formHeight);
+            this.Location = new Point(x, y);
+
             inputBox = new TextBox
             {
-                Width = 300,
-                Height = 30,
-                Location = new Point(20, 25),
+                Width = 400,
+                Location = new Point(10, 35),
                 Font = new Font("Segoe UI", 10),
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
             };
             inputBox.KeyDown += InputBox_KeyDown;
 
-            searchButton = new Button
+            sendButton = new Button
             {
-                Text = "🔍",
-                Width = 40,
-                Height = 30,
-                Location = new Point(330, 25),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Black,
-                ForeColor = Color.White
+                Text = "Send",
+                Location = new Point(420, 33),
+                Width = 60,
+                Height = 30
             };
-            searchButton.FlatAppearance.BorderSize = 0;
-            searchButton.Click += async (s, e) => await ProcessInput();
-
-            powerButton = new Button
-            {
-                Text = "⏻",
-                Width = 40,
-                Height = 30,
-                Location = new Point(380, 25),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Black,
-                ForeColor = Color.Red
-            };
-            powerButton.FlatAppearance.BorderSize = 0;
-            powerButton.Click += (s, e) => this.Close();
+            sendButton.Click += async (s, e) => await ProcessInput();
 
             this.Controls.Add(inputBox);
-            this.Controls.Add(searchButton);
-            this.Controls.Add(powerButton);
+            this.Controls.Add(sendButton);
         }
 
         private void InputBox_KeyDown(object sender, KeyEventArgs e)
@@ -154,9 +80,17 @@ namespace TaskAI
 
                 try
                 {
-                    string response = await AskMercury(userInput);
-                    string message = ParseMercuryResponse(response);
-                    MessageBox.Show(message, "Mercury AI Response");
+                    string response = await AskGemini(userInput);
+                    string parsed = ParseGeminiResponse(response);
+
+                    if (parsed.StartsWith("KILL:"))
+                    {
+                        HandleKillCommand(parsed.Substring(5));
+                    }
+                    else
+                    {
+                        MessageBox.Show(parsed, "Gemini AI Response");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -165,51 +99,234 @@ namespace TaskAI
             }
         }
 
-        private async Task<string> AskMercury(string prompt)
+        private async Task<string> AskGemini(string prompt)
         {
+            // get list of rprocesses
+            var runningProcesses = GetRunningProcessesList();
+            
             var payload = new
             {
-                model = "inception/mercury",
-                messages = new[]
+                contents = new[]
                 {
-                    new { role = "system", content = "You are a helpful assistant." },
-                    new { role = "user", content = prompt }
+                    new
+                    {
+                        role = "user",
+                        parts = new[]
+                        {
+                            new { text = "You are a Windows task assistant with access to the following running processes:\n\n" + runningProcesses + "\n\nWhen users ask about specific processes or want to close/kill applications, ONLY include processes from the above list in your response. Return a JSON object using this format:\n\njson\n{\n  \"kill\": [\"ProcessName1\", \"ProcessName2\"]\n}\n\n\nIf the user specifically asks for a process by name, ONLY include that process if it's in the list. Don't suggest killing processes the user is actively using (like browsers) unless specifically requested. For questions completely unrelated to processes, provide a helpful response as normal." }
+                        }
+                    },
+                    new
+                    {
+                        role = "user",
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
                 }
             };
 
+            var requestUri = $"{Endpoint}?key={ApiKey}";
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
-            httpClient.DefaultRequestHeaders.Add("HTTP-Referer", "https://yourapp.com");
-            httpClient.DefaultRequestHeaders.Add("X-Title", "TaskAI");
+            var response = await httpClient.PostAsync(requestUri, content);
+            response.EnsureSuccessStatusCode();
 
-            var response = await httpClient.PostAsync(Endpoint, content);
-            string raw = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"API Error {response.StatusCode}: {raw}");
-            }
-
-            return raw;
+            return await response.Content.ReadAsStringAsync();
         }
 
-        private string ParseMercuryResponse(string json)
+        private string GetRunningProcessesList()
+        {
+            try
+            {
+                var processes = Process.GetProcesses()
+                    .Where(p => {
+                        try { return !string.IsNullOrEmpty(p.ProcessName); }
+                        catch { return false; }
+                    })
+                    .GroupBy(p => p.ProcessName)
+                    .Select(g => new {
+                        Name = g.Key,
+                        Count = g.Count(),
+                        Memory = g.Sum(p => {
+                            try { return p.WorkingSet64; }
+                            catch { return 0L; }
+                        })
+                    })
+                    .OrderByDescending(p => p.Memory)
+                    .Take(50) // Limit rn=50 by memory usage
+                    .ToList();
+
+                var sb = new StringBuilder();
+                foreach (var proc in processes)
+                {
+                    string memoryUsage = FormatBytes(proc.Memory);
+                    sb.AppendLine($"{proc.Name} ({proc.Count} instances, {memoryUsage})");
+                }
+                
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                return "Error getting process list: " + ex.Message;
+            }
+        }
+
+        private string ParseGeminiResponse(string json)
         {
             try
             {
                 var doc = JsonDocument.Parse(json);
-                return doc.RootElement
-                          .GetProperty("choices")[0]
-                          .GetProperty("message")
-                          .GetProperty("content")
-                          .GetString() ?? "No response text found.";
+                var text = doc.RootElement
+                    .GetProperty("candidates")[0]
+                    .GetProperty("content")
+                    .GetProperty("parts")[0]
+                    .GetProperty("text")
+                    .GetString();
+
+                if (string.IsNullOrWhiteSpace(text))
+                    return "No response text found.";
+
+                string cleaned = text.Trim()
+                    .Replace("```json", "")
+                    .Replace("```", "")
+                    .Trim();
+
+                if (cleaned.StartsWith("{") && cleaned.Contains("\"kill\""))
+                    return "KILL:" + cleaned;
+
+                return text;
             }
             catch
             {
-                return "Error parsing Mercury response.";
+                return "Error parsing Gemini response.";
             }
+        }
+
+        private void HandleKillCommand(string json)
+        {
+            try
+            {
+                var doc = JsonDocument.Parse(json);
+                var killArray = doc.RootElement.GetProperty("kill");
+                var requested = killArray.EnumerateArray().Select(p => p.GetString()).Where(p => !string.IsNullOrEmpty(p)).ToList();
+
+                var protectedKeywords = new[]
+                {
+                    "system", "winlogon", "csrss", "dwm", "taskmgr", "explorer",
+                    "svchost", "spoolsv", "lsass", "services", "wininit", "smss",
+                    "conhost", "msmpeng", "securityhealthservice", "applicationframehost",
+                    "runtimebroker", "searchui", "startmenuexperiencehost", "sihost", "ctfmon",
+                    "windows", "microsoft", "dllhost", "fontdrvhost",
+                    "hp", "dell", "lenovo", "intel", "OneDrive"
+                };
+
+                var approved = requested
+                    .Where(procName =>
+                        !protectedKeywords.Any(protectedName =>
+                            procName.IndexOf(protectedName, StringComparison.OrdinalIgnoreCase) >= 0))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (approved.Count == 0)
+                {
+                    MessageBox.Show("No safe processes found to kill.", "Protected Process Filter");
+                    return;
+                }
+
+                // match name
+                var runningProcesses = Process.GetProcesses()
+                    .Where(p => {
+                        try { return !string.IsNullOrEmpty(p.ProcessName); }
+                        catch { return false; }
+                    })
+                    .ToList();
+                
+                // find match which is running
+                var matchingProcesses = new List<Process>();
+                foreach (var procName in approved)
+                {
+                    var matches = runningProcesses.Where(p => 
+                        p.ProcessName.Equals(procName, StringComparison.OrdinalIgnoreCase) ||
+                        p.ProcessName.Contains(procName, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                    
+                    matchingProcesses.AddRange(matches);
+                }
+                
+                if (matchingProcesses.Count == 0)
+                {
+                    MessageBox.Show("No matching processes found running.", "No Processes Found");
+                    return;
+                }
+
+                // get resource info before maut
+                var processInfo = new Dictionary<string, (long memory, TimeSpan cpu)>();
+                foreach (var proc in matchingProcesses)
+                {
+                    try
+                    {
+                        string procName = proc.ProcessName;
+                        long memoryUsage = proc.WorkingSet64;
+                        TimeSpan cpuTime = proc.TotalProcessorTime;
+                        
+                        processInfo[proc.Id.ToString()] = (memoryUsage, cpuTime);
+                    }
+                    catch { /* ss*/ }
+                }
+
+                string preview = "Gemini suggests killing the following processes:\n\n" + 
+                    string.Join("\n", matchingProcesses.Select(p => p.ProcessName).Distinct());
+                var confirm = MessageBox.Show(preview, "Confirm Kill", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    int killed = 0;
+                    long totalMemoryFreed = 0;
+                    
+                    foreach (var proc in matchingProcesses)
+                    {
+                        try
+                        {
+                            string procId = proc.Id.ToString();
+                            if (processInfo.ContainsKey(procId))
+                            {
+                                totalMemoryFreed += processInfo[procId].memory;
+                            }
+                            
+                            proc.Kill();
+                            killed++;
+                        }
+                        catch { /* skip ts */ }
+                    }
+
+                    string memoryMessage = totalMemoryFreed > 0 
+                        ? $"\nMemory freed: {FormatBytes(totalMemoryFreed)}"
+                        : "";
+                        
+                    MessageBox.Show($"Killed {killed} process(es).{memoryMessage}", "Done");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error handling kill command: " + ex.Message);
+            }
+        }
+
+        private string FormatBytes(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double formattedSize = bytes;
+            int order = 0;
+            
+            while (formattedSize >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                formattedSize /= 1024;
+            }
+
+            return $"{formattedSize:0.##} {sizes[order]}";
         }
     }
 }
